@@ -19,12 +19,13 @@ const TimezoneSelect = ({
   onChange,
   labelStyle = 'original',
   timezones,
+  extraLabels,
   ...props
 }: Props) => {
   if (!timezones) timezones = allTimezones
   const getOptions = React.useMemo(() => {
-    return Object.entries(timezones)
-      .reduce<ITimezoneOption[]>((selectOptions, zone) => {
+    const defaultEntries = Object.entries(timezones!).reduce<ITimezoneOption[]>(
+      (selectOptions, zone) => {
         const now = spacetime.now(zone[0])
         const tz = now.timezone()
         const tzStrings = soft(zone[0])
@@ -67,10 +68,30 @@ const TimezoneSelect = ({
         })
 
         return selectOptions
-      }, [])
-      .sort((a: ITimezoneOption, b: ITimezoneOption) => a.offset - b.offset)
-  }, [labelStyle, timezones])
+      },
+      []
+    )
+    extraLabels.length > 0 &&
+      extraLabels.forEach((option, index) => {
+        const entrie = defaultEntries.find(
+          entrie => extraLabels[index].tz === entrie.value
+        )
+        const label = entrie?.label.split(')')[0] + ')'
+        const newOption = {
+          abbrev: entrie?.abbrev,
+          altName: entrie?.altName,
+          label: `${label} ${option.label}`,
+          offset: entrie?.offset,
+          value: option.tz,
+        }
+        defaultEntries.push(newOption)
+      })
 
+    defaultEntries.sort(
+      (a: ITimezoneOption, b: ITimezoneOption) => a.offset! - b.offset!
+    )
+    return defaultEntries
+  }, [extraLabels, labelStyle, timezones])
   const handleChange = (tz: ITimezoneOption) => {
     onChange && onChange(tz)
   }

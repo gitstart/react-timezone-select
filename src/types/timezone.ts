@@ -21,4 +21,8 @@ export interface Props extends Omit<ReactSelectProps, "onChange"> {
   labelStyle?: ILabelStyle
   onChange?: (timezone: ITimezoneOption) => void
   timezones?: ICustomTimezone
+  extraLabels?: Array<{
+    label: string
+    tz: string
+  }>
 }
